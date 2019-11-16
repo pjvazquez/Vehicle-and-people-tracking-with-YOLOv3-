@@ -14,6 +14,8 @@ import time
 
 inputs = tf.placeholder(tf.float32, [None, 416, 416, 3])
 model = nets.YOLOv3COCO(inputs, nets.Darknet19)
+# FasterRCNN requires roi_pooling
+# model = nets.FasterRCNN_VGG16_VOC(inputs)
 #model = nets.YOLOv2(inputs, nets.Darknet19)
 
 #frame=cv2.imread("D://pyworks//yolo//truck.jpg",1)
@@ -21,9 +23,8 @@ model = nets.YOLOv3COCO(inputs, nets.Darknet19)
 classes={'0':'person','1':'bicycle','2':'car','3':'bike','5':'bus','7':'truck'}
 list_of_classes=[0,1,2,3,5,7]
 with tf.Session() as sess:
-    sess.run(model.pretrained())
-#"D://pyworks//yolo//videoplayback.mp4"    
-    cap = cv2.VideoCapture("G://ani_pers//videoplayback.mp4")
+    sess.run(model.pretrained())   
+    cap = cv2.VideoCapture("Videos/store2.avi")
     
     while(cap.isOpened()):
         ret, frame = cap.read()
@@ -31,9 +32,13 @@ with tf.Session() as sess:
         imge=np.array(img).reshape(-1,416,416,3)
         start_time=time.time()
         preds = sess.run(model.preds, {inputs: model.preprocess(imge)})
-    
+
         print("--- %s seconds ---" % (time.time() - start_time)) 
+
+        print(preds)
+
         boxes = model.get_boxes(preds, imge.shape[1:3])
+        print(boxes)
         cv2.namedWindow('image',cv2.WINDOW_NORMAL)
 
         cv2.resizeWindow('image', 700,700)
